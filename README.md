@@ -1,4 +1,6 @@
 # api-reports
+# Incident Report Management API
+
 ```mermaid
 classDiagram
 direction LR
@@ -108,10 +110,6 @@ Report --> ReportStatus
 ReportFile --> FileType
 
 ```
-
-# Incident Report Management API
-
-## Documentación Completa
 
 ---
 
