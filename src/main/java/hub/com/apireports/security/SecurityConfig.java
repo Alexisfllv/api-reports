@@ -38,13 +38,13 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
 
                         // Solo GET → ROLE_USER y ROLE_ADMIN
-                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyAuthority("MEMBER", "SUPERVISOR","ADMIN")
 
                         // POST, PUT, DELETE, PATCH → solo ROLE_ADMIN
-                        .requestMatchers(HttpMethod.POST, "/api/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/**").hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasAnyAuthority("ADMIN")
 
                         // Todo lo demás requiere autenticación
                         .anyRequest().authenticated()

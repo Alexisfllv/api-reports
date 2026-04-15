@@ -11,7 +11,6 @@ public record MemberDTOResponse(
         String phone,
         String email,
         String username,
-        String password,
         RoleType role,
         UserStatus status
 ) { }
