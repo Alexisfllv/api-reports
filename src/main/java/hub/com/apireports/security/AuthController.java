@@ -34,9 +34,4 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @GetMapping("/findAll")
-    public ResponseEntity<List<MemberDTOResponse>> findAllGet(){
-        List<MemberDTOResponse> res =  authService.findAll();
-        return ResponseEntity.status(HttpStatus.OK).body(res);
-    }
 }

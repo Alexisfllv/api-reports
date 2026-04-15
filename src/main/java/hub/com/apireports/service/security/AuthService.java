@@ -62,21 +62,4 @@ public class AuthService {
         return new AuthResponse(jwtUtil.generateToken(member), "Login successful");
     }
 
-    // FindAll
-    public List<MemberDTOResponse> findAll() {
-        return memberRepo.findAll().stream()
-                .map(member -> new MemberDTOResponse(
-                        member.getId(),
-                        member.getName(),
-                        member.getLastName(),
-                        member.getDni(),
-                        member.getPhone(),
-                        member.getEmail(),
-                        member.getUsername(),
-                        member.getPassword(),
-                        member.getRole(),
-                        member.getStatus()
-                ))
-                .toList();
-    }
 }
