@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -93,6 +94,99 @@ public class MemberServiceTest {
             inOrder.verifyNoMoreInteractions();
         }
 
+    }
+
+
+    @Nested
+    class FindByIdIndex {
+        @Test
+        public void findByIndex_shouldReturnMember_whenEmailExists() {
+            // Arrange
+            String email = "sarama@gmail.com";
+            when(memberRepo.findByEmailOrPhoneOrDni(email, null, null)).thenReturn(Optional.of(member));
+            when(memberMapper.toMemberDTOResponse(member)).thenReturn(memberDTOResponse);
+            // Act
+            List<MemberDTOResponse> result = memberService.findByIndex(email, null, null);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(1, result.size()),
+                    () -> assertEquals(memberDTOResponse, result.get(0))
+            );
+
+            // InOrder & Verify
+            InOrder inOrder = Mockito.inOrder(memberRepo, memberMapper);
+            inOrder.verify(memberRepo).findByEmailOrPhoneOrDni(email, null, null);
+            inOrder.verify(memberMapper).toMemberDTOResponse(member);
+            inOrder.verifyNoMoreInteractions();
+        }
+
+        @Test
+        public void findByIndex_shouldReturnMember_whenPhoneExists() {
+            // Arrange
+            String phone = "920287650";
+            when(memberRepo.findByEmailOrPhoneOrDni(null, phone, null)).thenReturn(Optional.of(member));
+            when(memberMapper.toMemberDTOResponse(member)).thenReturn(memberDTOResponse);
+
+            // Act
+            List<MemberDTOResponse> result = memberService.findByIndex(null, phone, null);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(1, result.size()),
+                    () -> assertEquals(memberDTOResponse, result.get(0))
+            );
+
+            // InOrder & Verify
+            InOrder inOrder = Mockito.inOrder(memberRepo, memberMapper);
+            inOrder.verify(memberRepo).findByEmailOrPhoneOrDni(null, phone, null);
+            inOrder.verify(memberMapper).toMemberDTOResponse(member);
+            inOrder.verifyNoMoreInteractions();
+        }
+
+        @Test
+        public void findByIndex_shouldReturnMember_whenDniExists() {
+            // Arrange
+            String dni = "70576713";
+            when(memberRepo.findByEmailOrPhoneOrDni(null, null, dni)).thenReturn(Optional.of(member));
+            when(memberMapper.toMemberDTOResponse(member)).thenReturn(memberDTOResponse);
+
+            // Act
+            List<MemberDTOResponse> result = memberService.findByIndex(null, null, dni);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(1, result.size()),
+                    () -> assertEquals(memberDTOResponse, result.get(0))
+            );
+
+            // InOrder & Verify
+            InOrder inOrder = Mockito.inOrder(memberRepo, memberMapper);
+            inOrder.verify(memberRepo).findByEmailOrPhoneOrDni(null, null, dni);
+            inOrder.verify(memberMapper).toMemberDTOResponse(member);
+            inOrder.verifyNoMoreInteractions();
+        }
+
+        @Test
+        public void findByIndex_shouldReturnEmptyList_whenNotFound() {
+            // Arrange
+            String dni = "9876543";
+            when(memberRepo.findByEmailOrPhoneOrDni(null, null, dni)).thenReturn(Optional.empty());
+
+            // Act
+            List<MemberDTOResponse> result = memberService.findByIndex(null, null, dni);
+
+            // Assert
+            assertAll(
+                    () -> assertNotNull(result),
+                    () -> assertTrue(result.isEmpty())
+            );
+
+            // InOrder & Verify
+            InOrder inOrder = Mockito.inOrder(memberRepo, memberMapper);
+            inOrder.verify(memberRepo).findByEmailOrPhoneOrDni(null, null, dni);
+            inOrder.verifyNoMoreInteractions();
+        }
     }
 
 }

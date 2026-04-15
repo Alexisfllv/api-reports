@@ -9,4 +9,7 @@ public interface MemberService {
     // GET
     // findAll
     List<MemberDTOResponse> findAll();
+
+    // findByEmailOrPhoneOrDni
+    List<MemberDTOResponse> findByIndex(String email, String phone, String dni);
 }
