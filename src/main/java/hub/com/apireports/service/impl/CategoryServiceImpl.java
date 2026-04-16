@@ -10,6 +10,8 @@ import hub.com.apireports.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -23,5 +25,13 @@ public class CategoryServiceImpl implements CategoryService {
         category.setActive(true);
         Category categorySaved = categoryRepo.save(category);
         return categoryMapper.toCategoryDTOResponse(categorySaved);
+    }
+
+    @Override
+    public List<CategoryDTOResponse> getAllCategories() {
+        List<Category> categories = categoryRepo.findAll();
+        return categories.stream()
+                .map(categoryMapper::toCategoryDTOResponse)
+                .toList();
     }
 }
