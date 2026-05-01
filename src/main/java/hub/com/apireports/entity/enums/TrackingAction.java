@@ -1,0 +1,12 @@
+package hub.com.apireports.entity.enums;
+
+public enum TrackingAction {
+    REPORT_CREATED,
+    STATUS_CHANGED_TO_IN_REVIEW,
+    STATUS_CHANGED_TO_ASSIGNED,
+    STATUS_CHANGED_TO_RESOLVED,
+    STATUS_CHANGED_TO_REJECTED,
+    STATUS_CHANGED_TO_CLOSED,
+    FILE_UPLOADED,
+    FILE_DELETED
+}
