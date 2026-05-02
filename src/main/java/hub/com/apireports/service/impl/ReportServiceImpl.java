@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -63,5 +64,13 @@ public class ReportServiceImpl implements ReportService {
 
         return reportMapper.toReportDTOResponse(savedReport);
 
+    }
+
+    @Override
+    public List<ReportDTOResponse> getAllReports() {
+        List<Report> reports = reportRepo.findAll();
+        return reports.stream()
+                .map(reportMapper::toReportDTOResponse)
+                .toList();
     }
 }
