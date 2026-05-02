@@ -7,3 +7,8 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
+file:
+  upload:
+    dir: uploads/reports
+    max-size-bytes: 5242880
