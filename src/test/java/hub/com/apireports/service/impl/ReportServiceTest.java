@@ -18,6 +18,7 @@ import hub.com.apireports.service.domain.MemberServiceDomain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,9 +28,10 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +64,8 @@ public class ReportServiceTest {
     private Member member;
     private Category category;
     private ReportDTORequest request;
+    private ReportDTOResponse response;
+    private Report report;
 
     @BeforeEach
     void setUp() {
@@ -71,13 +75,32 @@ public class ReportServiceTest {
         lenient().when(clock.getZone())
                 .thenReturn(ZoneId.systemDefault());
 
-        member = new Member();
-        member.setId(1L);
-        member.setName("Alexis");
+        Member member = new Member();
+        member.setId(2L);
+        member.setName("Ferr");
 
         category = new Category();
         category.setId(2L);
         category.setName("Seguridad");
+
+        report = new Report();
+        report.setId(2L);
+        report.setTitle("Robo en almacén");
+        report.setDescription("Acceso no autorizado detectado");
+        report.setIncidentDate(LocalDateTime.of(2026, Month.MARCH, 20, 10, 0));
+        report.setReportDate(LocalDateTime.now());
+        report.setCountry("PERU");
+        report.setRegion(RegionType.LIMA);
+        report.setProvince("LIMA");
+        report.setDistrict("MIRAFLORES");
+        report.setAddress("Av. Principal 123");
+        report.setReference("Cerca de la puerta trasera");
+        report.setLatitude(new BigDecimal("-12.0464"));
+        report.setLongitude(new BigDecimal("-77.0428"));
+        report.setPriorityLevel(PriorityLevel.HIGH);
+        report.setStatus(ReportStatus.PENDING);
+        report.setCategory(category);
+        report.setMember(member);
 
         request = new ReportDTORequest(
                 "Robo en almacén",
@@ -93,6 +116,30 @@ public class ReportServiceTest {
                 PriorityLevel.HIGH,
                 ReportStatus.PENDING,
                 2L
+        );
+
+        response = new ReportDTOResponse(
+                2L, // ID del reporte generado
+                "Robo en almacén",
+                "Acceso no autorizado detectado",
+                LocalDateTime.of(2026, Month.MARCH, 20, 10, 0),
+                LocalDateTime.now(), // O LocalDateTime.parse("2026-03-20T10:05:00")
+                "PERU",
+                RegionType.LIMA,
+                "LIMA",
+                "Lima",
+                "MIRAFLORES",
+                "Miraflores",
+                "Av. Principal 123",
+                "Cerca de la puerta trasera",
+                new BigDecimal("-12.0464"),
+                new BigDecimal("-77.0428"),
+                PriorityLevel.HIGH,
+                ReportStatus.PENDING,
+                2L,
+                "Seguridad", // Nombre de categoría asumido para ID 2L
+                2L,
+                "Ferr"
         );
     }
 
@@ -154,5 +201,34 @@ public class ReportServiceTest {
         verify(categoryServiceDomain, times(1)).findById(2L);
         verify(reportRepo, times(1)).save(mappedReport);
         verify(trackingHistoryRepo, times(1)).save(any(TrackingHistory.class));
+    }
+
+    @Test
+    void getAllReports_(){
+
+        // Arrange
+        List<ReportDTOResponse> expectedResponse = List.of(response);
+        List<Report> listReport = List.of(report);
+        when(reportRepo.findAll()).thenReturn(listReport);
+        when(reportMapper.toReportDTOResponse(report)).thenReturn(response);
+        // Act
+        List<ReportDTOResponse> result = reportService.getAllReports();
+        // Assert
+        assertAll(
+                () -> assertEquals(1, result.size()),
+                () -> assertEquals(response.id(), result.get(0).id()),
+                () -> assertEquals(response.title(), result.get(0).title()),
+                () -> assertEquals(response.status(), result.get(0).status()),
+                () -> assertEquals(response.reportDate(), result.get(0).reportDate()),
+                () -> assertEquals(response.categoryName(), result.get(0).categoryName()),
+                () -> assertEquals(response.memberName(), result.get(0).memberName()),
+                () -> assertEquals(response,result.get(0))
+        );
+
+        // InOrder & Verify
+        InOrder inOrder = inOrder(reportRepo, reportMapper);
+        inOrder.verify(reportRepo, times(1)).findAll();
+        inOrder.verify(reportMapper, times(1)).toReportDTOResponse(report);
+        inOrder.verifyNoMoreInteractions();
     }
 }
