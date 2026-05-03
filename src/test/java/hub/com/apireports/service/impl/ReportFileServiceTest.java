@@ -80,7 +80,7 @@ public class ReportFileServiceTest {
         // maxsizeBytes
         Field maxSizeField = ReportFileServiceImpl.class.getDeclaredField("maxSizeBytes");
         maxSizeField.setAccessible(true);
-        maxSizeField.set(reportFileService,5242880L); // 5MB
+        maxSizeField.set(reportFileService,209715200L); // 200MB
 
         member = new Member();
         member.setId(1L);
@@ -280,7 +280,7 @@ public class ReportFileServiceTest {
         void uploadFiles_withFileSizeExceeded_throwsBusinessRuleException(){
             // Arrange
             // MAX  = 5MB
-            byte[] bigContent = new byte[6 * 1024 * 1024];
+            byte[] bigContent = new byte[201 * 1024 * 1024];
             MockMultipartFile bigFile = new MockMultipartFile(
                     "files","grande.jpge","image/jpeg",bigContent
             );

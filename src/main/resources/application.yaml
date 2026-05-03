@@ -1,7 +1,10 @@
 spring:
   application:
-    name: ${SPRING_APP_NAME:api_store}
-
+    name: ${SPRING_APP_NAME:api_reports}
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 500MB
   jpa:
     open-in-view: false
 
@@ -11,4 +14,4 @@ server:
 file:
   upload:
     dir: uploads/reports
-    max-size-bytes: 5242880
+    max-size-bytes: 209715200
