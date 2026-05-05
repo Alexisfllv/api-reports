@@ -47,7 +47,6 @@ public class ReportServiceDomain {
     public TrackingAction getTrackingAction(ReportStatus status){
         return switch (status) {
             case IN_REVIEW -> TrackingAction.STATUS_CHANGED_TO_IN_REVIEW;
-            case ASSIGNED -> TrackingAction.STATUS_CHANGED_TO_ASSIGNED;
             case RESOLVED -> TrackingAction.STATUS_CHANGED_TO_RESOLVED;
             case REJECTED -> TrackingAction.STATUS_CHANGED_TO_REJECTED;
             case CLOSED -> TrackingAction.STATUS_CHANGED_TO_CLOSED;

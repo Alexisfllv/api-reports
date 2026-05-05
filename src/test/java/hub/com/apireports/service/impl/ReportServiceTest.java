@@ -2,6 +2,7 @@ package hub.com.apireports.service.impl;
 
 import hub.com.apireports.dto.file.ReportFileSummaryDTOResponse;
 import hub.com.apireports.dto.report.ReportDTORequest;
+import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
 import hub.com.apireports.dto.report.ReportDTOResponse;
 import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
 import hub.com.apireports.entity.Category;
@@ -19,6 +20,7 @@ import hub.com.apireports.repo.TrackingHistoryRepo;
 import hub.com.apireports.service.ReportService;
 import hub.com.apireports.service.domain.CategoryServiceDomain;
 import hub.com.apireports.service.domain.MemberServiceDomain;
+import hub.com.apireports.service.domain.ReportServiceDomain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +36,7 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -58,6 +61,9 @@ public class ReportServiceTest {
 
     @Mock
     private Clock clock;
+
+    @Mock
+    private ReportServiceDomain reportServiceDomain;
 
     @InjectMocks
     private ReportServiceImpl reportService;
@@ -311,5 +317,64 @@ public class ReportServiceTest {
         inOrder.verify(reportRepo, times(1)).findallWithFiles();
         inOrder.verify(reportMapper, times(1)).toReportSummaryDTOResponse(report);
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void toggleReportStatus(){
+        // Arrange
+        Long reportId= 2L;
+        Long memberId = 2L;
+
+        Report reportUpdate = report;
+        reportUpdate.setStatus(ReportStatus.IN_REVIEW);
+
+        when(reportServiceDomain.findById(reportId)).thenReturn(report);
+        when(memberServiceDomain.findById(memberId)).thenReturn(member);
+
+        when(reportRepo.save(report)).thenReturn(reportUpdate);
+        when(trackingHistoryRepo.save(any(TrackingHistory.class))).thenReturn(new TrackingHistory());
+
+         ReportSummaryDTOResponse expectedResponse = new ReportSummaryDTOResponse(
+                2L,
+                "Robo en almacén",
+                "Acceso no autorizado detectado",
+                LocalDateTime.of(2026, Month.MARCH, 20, 10, 0),
+                fixedNow,
+                "PERU",
+                RegionType.LIMA,
+                "LIMA",
+                "Lima",
+                "MIRAFLORES",
+                "Miraflores",
+                "Av. Principal 123",
+                "Cerca de la puerta trasera",
+                new BigDecimal("-12.0464"),
+                new BigDecimal("-77.0428"),
+                PriorityLevel.HIGH,
+                ReportStatus.IN_REVIEW,
+                2L,
+                "Seguridad",
+                2L,
+                "Ferr",
+                 0,
+                 List.of()
+        );
+
+        when(reportMapper.toReportSummaryDTOResponse(reportUpdate)).thenReturn(expectedResponse);
+
+         ReportDTORequestToggleStatus toggleStatus = new ReportDTORequestToggleStatus(
+                 ReportStatus.IN_REVIEW,
+                 "Revisión inicial"
+         );
+        // Act
+        ReportSummaryDTOResponse res = reportService.toggleReportStatus(reportId,memberId,toggleStatus);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(ReportStatus.IN_REVIEW, report.getStatus()),
+                () -> assertEquals(expectedResponse, res)
+        );
+
+        // InOrder & Verify
     }
 }
