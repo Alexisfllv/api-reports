@@ -1,11 +1,13 @@
 package hub.com.apireports.service.impl;
 
 import hub.com.apireports.dto.report.ReportDTORequest;
+import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
 import hub.com.apireports.dto.report.ReportDTOResponse;
 import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
 import hub.com.apireports.entity.Category;
 import hub.com.apireports.entity.Report;
 import hub.com.apireports.entity.TrackingHistory;
+import hub.com.apireports.entity.enums.ReportStatus;
 import hub.com.apireports.entity.enums.TrackingAction;
 import hub.com.apireports.entity.security.Member;
 import hub.com.apireports.mapper.ReportMapper;
@@ -16,6 +18,7 @@ import hub.com.apireports.repo.TrackingHistoryRepo;
 import hub.com.apireports.service.ReportService;
 import hub.com.apireports.service.domain.CategoryServiceDomain;
 import hub.com.apireports.service.domain.MemberServiceDomain;
+import hub.com.apireports.service.domain.ReportServiceDomain;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class ReportServiceImpl implements ReportService {
     private final MemberServiceDomain memberServiceDomain;
     // clock
     private final Clock clock;
+    private final ReportServiceDomain reportServiceDomain;
 
     @Override
     @Transactional
@@ -51,6 +55,7 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportMapper.toReport(reportDTORequest, category);
         report.setMember(member);
         report.setReportDate(LocalDateTime.now(clock));
+        report.setStatus(ReportStatus.PENDING);
         report.setCountry("PERU");
 
         Report savedReport = reportRepo.save(report);
@@ -81,5 +86,31 @@ public class ReportServiceImpl implements ReportService {
                 .stream()
                 .map(reportMapper::toReportSummaryDTOResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public ReportSummaryDTOResponse toggleReportStatus(Long idReport,Long idMember, ReportDTORequestToggleStatus toggleStatus) {
+        // report id
+        Report report = reportServiceDomain.findById(idReport);
+
+        // member id
+        Member member = memberServiceDomain.findById(idMember);
+
+        reportServiceDomain.validateStatus(report.getStatus(), toggleStatus.newStatus());
+
+        report.setStatus(toggleStatus.newStatus());
+        Report updatedReport = reportRepo.save(report);
+
+        // create TrackingHistory
+        TrackingHistory tracking = new TrackingHistory();
+        tracking.setId(null);
+        tracking.setCoomment(toggleStatus.comment());
+        tracking.setAction(reportServiceDomain.getTrackingAction(toggleStatus.newStatus()));
+        tracking.setReport(updatedReport);
+        tracking.setMember(member);
+        trackingHistoryRepo.save(tracking);
+
+        return reportMapper.toReportSummaryDTOResponse(updatedReport);
     }
 }

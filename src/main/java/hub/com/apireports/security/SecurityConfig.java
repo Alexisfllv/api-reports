@@ -37,14 +37,27 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
 
-                        // Solo GET → ROLE_USER y ROLE_ADMIN
-                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyAuthority("MEMBER", "SUPERVISOR","ADMIN")
+                        // GET → todos los roles autenticados
+                        .requestMatchers(HttpMethod.GET, "/api/**")
+                        .hasAnyAuthority("MEMBER", "SUPERVISOR", "ADMIN")
 
-                        // POST, PUT, DELETE, PATCH → solo ROLE_ADMIN
-                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/**").hasAnyAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasAnyAuthority("ADMIN")
+                        // Crear reporte y subir archivos → MEMBER, SUPERVISOR, ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/reports/**")
+                        .hasAnyAuthority("MEMBER", "SUPERVISOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/report-file/**")
+                        .hasAnyAuthority("MEMBER", "SUPERVISOR", "ADMIN")
+
+                        // Cambiar status → solo SUPERVISOR y ADMIN
+                        .requestMatchers(HttpMethod.PATCH, "/api/reports/**")
+                        .hasAnyAuthority("SUPERVISOR", "ADMIN")
+
+                        // Categories → solo ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/categories/**")
+                        .hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/categories/**")
+                        .hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**")
+                        .hasAnyAuthority("ADMIN")
 
                         // Todo lo demás requiere autenticación
                         .anyRequest().authenticated()

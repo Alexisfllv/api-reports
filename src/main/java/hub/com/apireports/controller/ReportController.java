@@ -2,6 +2,7 @@ package hub.com.apireports.controller;
 
 
 import hub.com.apireports.dto.report.ReportDTORequest;
+import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
 import hub.com.apireports.dto.report.ReportDTOResponse;
 import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
 import hub.com.apireports.entity.security.Member;
@@ -41,5 +42,15 @@ public class ReportController {
     public ResponseEntity<List<ReportSummaryDTOResponse>> getAllReportSummaries(){
         List<ReportSummaryDTOResponse> reports = reportService.getAllReportSummaries();
         return ResponseEntity.status(HttpStatus.OK).body(reports);
+    }
+
+    @PatchMapping("/{reportId}/status")
+    public ResponseEntity<ReportSummaryDTOResponse>  updateReportStatus(
+            @PathVariable Long reportId,
+            @AuthenticationPrincipal Member member,
+            @Valid @RequestBody ReportDTORequestToggleStatus reportToggle){
+        ReportSummaryDTOResponse res = reportService.toggleReportStatus(reportId, member.getId(), reportToggle);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+
     }
 }

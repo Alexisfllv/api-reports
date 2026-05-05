@@ -1,6 +1,7 @@
 package hub.com.apireports.service;
 
 import hub.com.apireports.dto.report.ReportDTORequest;
+import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
 import hub.com.apireports.dto.report.ReportDTOResponse;
 import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
 
@@ -17,4 +18,8 @@ public interface ReportService {
 
     // Summary
     List<ReportSummaryDTOResponse> getAllReportSummaries();
+
+
+    // PATCH
+    ReportSummaryDTOResponse toggleReportStatus(Long idReport,Long idMember,ReportDTORequestToggleStatus  toggleStatus);
 }
