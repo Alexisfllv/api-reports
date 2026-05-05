@@ -2,6 +2,7 @@ package hub.com.apireports.service;
 
 import hub.com.apireports.dto.report.ReportDTORequest;
 import hub.com.apireports.dto.report.ReportDTOResponse;
+import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
 
 import java.util.List;
 
@@ -13,4 +14,7 @@ public interface ReportService {
 
     // GET
     List<ReportDTOResponse> getAllReports();
+
+    // Summary
+    List<ReportSummaryDTOResponse> getAllReportSummaries();
 }

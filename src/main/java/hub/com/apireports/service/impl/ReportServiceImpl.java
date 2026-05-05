@@ -2,6 +2,7 @@ package hub.com.apireports.service.impl;
 
 import hub.com.apireports.dto.report.ReportDTORequest;
 import hub.com.apireports.dto.report.ReportDTOResponse;
+import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
 import hub.com.apireports.entity.Category;
 import hub.com.apireports.entity.Report;
 import hub.com.apireports.entity.TrackingHistory;
@@ -71,6 +72,14 @@ public class ReportServiceImpl implements ReportService {
         List<Report> reports = reportRepo.findAll();
         return reports.stream()
                 .map(reportMapper::toReportDTOResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ReportSummaryDTOResponse> getAllReportSummaries() {
+        return reportRepo.findallWithFiles()
+                .stream()
+                .map(reportMapper::toReportSummaryDTOResponse)
                 .toList();
     }
 }

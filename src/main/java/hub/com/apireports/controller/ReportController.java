@@ -3,6 +3,7 @@ package hub.com.apireports.controller;
 
 import hub.com.apireports.dto.report.ReportDTORequest;
 import hub.com.apireports.dto.report.ReportDTOResponse;
+import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
 import hub.com.apireports.entity.security.Member;
 import hub.com.apireports.service.ReportService;
 import hub.com.apireports.service.security.MemberDetailServiceImpl;
@@ -33,6 +34,12 @@ public class ReportController {
     @GetMapping
     public ResponseEntity<List<ReportDTOResponse>> getAllReports(){
         List<ReportDTOResponse> reports = reportService.getAllReports();
+        return ResponseEntity.status(HttpStatus.OK).body(reports);
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<List<ReportSummaryDTOResponse>> getAllReportSummaries(){
+        List<ReportSummaryDTOResponse> reports = reportService.getAllReportSummaries();
         return ResponseEntity.status(HttpStatus.OK).body(reports);
     }
 }

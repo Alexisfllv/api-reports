@@ -1,10 +1,14 @@
 package hub.com.apireports.service.impl;
 
+import hub.com.apireports.dto.file.ReportFileSummaryDTOResponse;
 import hub.com.apireports.dto.report.ReportDTORequest;
 import hub.com.apireports.dto.report.ReportDTOResponse;
+import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
 import hub.com.apireports.entity.Category;
 import hub.com.apireports.entity.Report;
+import hub.com.apireports.entity.ReportFile;
 import hub.com.apireports.entity.TrackingHistory;
+import hub.com.apireports.entity.enums.FileType;
 import hub.com.apireports.entity.enums.PriorityLevel;
 import hub.com.apireports.entity.enums.RegionType;
 import hub.com.apireports.entity.enums.ReportStatus;
@@ -229,6 +233,83 @@ public class ReportServiceTest {
         InOrder inOrder = inOrder(reportRepo, reportMapper);
         inOrder.verify(reportRepo, times(1)).findAll();
         inOrder.verify(reportMapper, times(1)).toReportDTOResponse(report);
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void getAllReportSummaries(){
+        // Arrange
+
+        ReportFileSummaryDTOResponse file1 = new ReportFileSummaryDTOResponse(
+                1L,
+                "546f1a771884f29105307598a5cee0c8.jpg",
+                "/uploads/reports/1/50a702ff-7086-4ca1-8765-e27d77155974.jpg",
+                FileType.IMAGE,
+                40419L
+        );
+
+        ReportFileSummaryDTOResponse file2 = new ReportFileSummaryDTOResponse(
+                2L,
+                "sam.jpg",
+                "/uploads/reports/1/73a5d774-ce05-4dd3-bec3-ff25e382397a.jpg",
+                FileType.IMAGE,
+                65345L
+        );
+
+        List<ReportFileSummaryDTOResponse> files = List.of(file1,file2);
+
+        ReportSummaryDTOResponse  expectedResponse = new ReportSummaryDTOResponse(
+                1L,
+                "Poste de luz caído",
+                "Se reporta un poste de luz caído en medio de la vía pública generando peligro para peatones y vehículos.",
+                LocalDateTime.of(2026, Month.MARCH, 20, 9, 0),
+                LocalDateTime.of(2026, Month.MARCH, 20, 10, 0),
+                "PERU",
+                RegionType.LIMA,
+                "LIMA",
+                "Lima",
+                "SAN_JUAN_DE_LURIGANCHO",
+                "San Juan de Lurigancho",
+                "Av. Próceres de la Independencia 1234",
+                "Frente al mercado principal",
+                new BigDecimal("-12.0464"),
+                new BigDecimal("-77.0428"),
+                PriorityLevel.CRITICAL,
+                ReportStatus.PENDING,
+                1L,
+                "Vandalismo",
+                1l,
+                "Ferr",
+                2,
+                files
+        );
+
+        Report report = new Report();
+        report.setId(1L);
+
+        when(reportRepo.findallWithFiles()).thenReturn(List.of(report));
+        when(reportMapper.toReportSummaryDTOResponse(report)).thenReturn(expectedResponse);
+
+        // Act
+        List<ReportSummaryDTOResponse> result = reportService.getAllReportSummaries();
+
+        // Assert
+
+        assertAll(
+                () -> assertNotNull(result),
+                () -> assertEquals(1, result.size()),
+                () -> assertEquals(1L, result.get(0).id()),
+                () -> assertEquals("Poste de luz caído", result.get(0).title()),
+                () -> assertEquals(ReportStatus.PENDING, result.get(0).status()),
+                () -> assertEquals(2, result.get(0).totalFiles()),
+                () -> assertEquals(expectedResponse, result.get(0))
+        );
+
+
+        //  InOrder & Verify
+        InOrder inOrder = inOrder(reportRepo, reportMapper);
+        inOrder.verify(reportRepo, times(1)).findallWithFiles();
+        inOrder.verify(reportMapper, times(1)).toReportSummaryDTOResponse(report);
         inOrder.verifyNoMoreInteractions();
     }
 }
