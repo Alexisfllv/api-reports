@@ -50,7 +50,7 @@ public record ReportDTORequest(
         @NotNull(message = "{field.required}")
         PriorityLevel priorityLevel,
 
-        @NotNull(message = "{field.required}")
+        //@NotNull(message = "{field.required}")
         ReportStatus status,
 
         @NotNull(message = "{field.required}")
