@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 // #7
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -37,9 +39,13 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
 
-                        // GET → todos los roles autenticados
-                        .requestMatchers(HttpMethod.GET, "/api/**")
-                        .hasAnyAuthority("MEMBER", "SUPERVISOR", "ADMIN")
+                        // GET específico por recurso
+                        .requestMatchers(HttpMethod.GET, "/api/reports/**")
+                        .hasAnyAuthority("SUPERVISOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**")
+                        .hasAnyAuthority("ADMIN")  // ← Solo ADMIN para categories
+                        .requestMatchers(HttpMethod.GET, "/api/members/**")
+                        .hasAnyAuthority("ADMIN")  // ← Solo ADMIN para members
 
                         // Crear reporte y subir archivos → MEMBER, SUPERVISOR, ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/reports/**")
