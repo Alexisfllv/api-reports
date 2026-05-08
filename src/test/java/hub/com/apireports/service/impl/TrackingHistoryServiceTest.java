@@ -1,6 +1,7 @@
 package hub.com.apireports.service.impl;
 
 import hub.com.apireports.dto.tracking.TrackingHistoryDTOResponse;
+import hub.com.apireports.dto.tracking.TrackingHistoryGroupedDTOResponse;
 import hub.com.apireports.entity.Report;
 import hub.com.apireports.entity.TrackingHistory;
 import hub.com.apireports.entity.enums.TrackingAction;
@@ -103,5 +104,59 @@ public class TrackingHistoryServiceTest {
         inOrder.verifyNoMoreInteractions();
     }
 
+    @Test
+    void getAllTrackingHistoryGroupedByReport(){
+        // Arrange
+        Member member2 = new Member();
+        member2.setId(3L);
+        member2.setName("carlos");
 
+        Report report2 = new Report();
+        report2.setId(2L);
+
+        TrackingHistory trackingHistory2 = new TrackingHistory(
+                2L,
+                TrackingAction.REPORT_CREATED,
+                "Second report",
+                report2,
+                member2
+        );
+
+        TrackingHistoryDTOResponse trackingHistoryDTOResponse2 = new TrackingHistoryDTOResponse(
+                2L,
+                TrackingAction.REPORT_CREATED,
+                "Second report",
+                report2.getId(),
+                member2.getId(),
+                member2.getName()
+        );
+
+        // Mock findAll devolviendo múltiples tracking histories
+        when(trackingHistoryRepo.findAll()).thenReturn(List.of(trackingHistory, trackingHistory2));
+
+        // Mock mapper para ambos tracking histories
+        when(trackingHistoryMapper.toTrackingDTOResponse(trackingHistory, report)).thenReturn(trackingHistoryDTOResponse);
+        when(trackingHistoryMapper.toTrackingDTOResponse(trackingHistory2, report2)).thenReturn(trackingHistoryDTOResponse2);
+
+        // Act
+        TrackingHistoryGroupedDTOResponse result = trackingHistoryService.getAllTrackingHistoryGroupedByReport();
+
+        // Assert
+        assertAll(
+                () -> assertTrue(result.groupedByReport().size() == 2),
+                () -> assertTrue(result.groupedByReport().containsKey(1L)),
+                () -> assertTrue(result.groupedByReport().containsKey(2L)),
+                () -> assertTrue(result.groupedByReport().get(1L).size() == 1),
+                () -> assertTrue(result.groupedByReport().get(2L).size() == 1),
+                () -> assertTrue(result.groupedByReport().get(1L).get(0).id().equals(1L)),
+                () -> assertTrue(result.groupedByReport().get(2L).get(0).id().equals(2L))
+        );
+
+        // Verify mocks were called
+        InOrder inOrder = Mockito.inOrder(trackingHistoryRepo, trackingHistoryMapper);
+        inOrder.verify(trackingHistoryRepo).findAll();
+        inOrder.verify(trackingHistoryMapper).toTrackingDTOResponse(trackingHistory, report);
+        inOrder.verify(trackingHistoryMapper).toTrackingDTOResponse(trackingHistory2, report2);
+        inOrder.verifyNoMoreInteractions();
+    }
 }
