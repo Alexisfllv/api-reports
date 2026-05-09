@@ -4,6 +4,7 @@ import hub.com.apireports.dto.report.ReportDTORequest;
 import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
 import hub.com.apireports.dto.report.ReportDTOResponse;
 import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
+import hub.com.apireports.entity.security.Member;
 
 import java.util.List;
 
@@ -18,6 +19,9 @@ public interface ReportService {
 
     // Summary
     List<ReportSummaryDTOResponse> getAllReportSummaries();
+
+    // reports by rol "Member"
+    List<ReportSummaryDTOResponse> getReportSummariesByMember(Member member);
 
 
     // PATCH

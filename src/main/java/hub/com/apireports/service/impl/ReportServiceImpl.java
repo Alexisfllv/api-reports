@@ -89,6 +89,18 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<ReportSummaryDTOResponse> getReportSummariesByMember(Member member) {
+
+        List<Report> reports;
+
+        reports = reportServiceDomain.validateMember(member);
+
+        return reports.stream()
+                .map(reportMapper::toReportSummaryDTOResponse)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public ReportSummaryDTOResponse toggleReportStatus(Long idReport,Long idMember, ReportDTORequestToggleStatus toggleStatus) {
         // report id

@@ -13,4 +13,7 @@ public interface ReportRepo extends JpaRepository<Report,Long> {
 
     @Query("SELECT DISTINCT  r FROM Report r LEFT JOIN FETCH r.files")
     List<Report> findallWithFiles();
+
+    // get all reports by id member
+    List<Report> findByMemberId(Long memberId);
 }

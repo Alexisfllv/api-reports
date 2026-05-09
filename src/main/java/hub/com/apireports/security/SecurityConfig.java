@@ -41,7 +41,7 @@ public class SecurityConfig {
 
                         // GET específico por recurso
                         .requestMatchers(HttpMethod.GET, "/api/reports/**")
-                        .hasAnyAuthority("SUPERVISOR", "ADMIN")
+                        .hasAnyAuthority("SUPERVISOR", "ADMIN","MEMBER")
                         .requestMatchers(HttpMethod.GET, "/api/categories/**")
                         .hasAnyAuthority("ADMIN")  // ← Solo ADMIN para categories
                         .requestMatchers(HttpMethod.GET, "/api/members/**")

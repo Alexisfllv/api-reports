@@ -3,6 +3,8 @@ package hub.com.apireports.service.domain;
 import hub.com.apireports.entity.Report;
 import hub.com.apireports.entity.enums.ReportStatus;
 import hub.com.apireports.entity.enums.TrackingAction;
+import hub.com.apireports.entity.security.Member;
+import hub.com.apireports.entity.security.RoleType;
 import hub.com.apireports.repo.ReportRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -53,5 +55,15 @@ public class ReportServiceDomain {
 
             default ->  throw new RuntimeException("Report status not found :"+status);
         };
+    }
+
+    // validate member or admin-super
+    public List<Report> validateMember (Member member){
+        if (member.getRole() == RoleType.MEMBER) {
+            return reportRepo.findByMemberId(member.getId());
+        } else if (member.getRole() == RoleType.ADMIN || member.getRole() == RoleType.SUPERVISOR) {
+            return reportRepo.findAll();
+        }
+        throw new RuntimeException("Role invalid : "+ member.getRole());
     }
 }
