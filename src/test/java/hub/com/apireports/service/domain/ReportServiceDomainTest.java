@@ -5,6 +5,8 @@ import hub.com.apireports.entity.ReportFile;
 import hub.com.apireports.entity.enums.FileType;
 import hub.com.apireports.entity.enums.ReportStatus;
 import hub.com.apireports.entity.enums.TrackingAction;
+import hub.com.apireports.entity.security.Member;
+import hub.com.apireports.entity.security.RoleType;
 import hub.com.apireports.repo.ReportRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,10 +20,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportServiceDomainTest {
@@ -207,6 +210,77 @@ public class ReportServiceDomainTest {
             RuntimeException ex = assertThrows(RuntimeException.class, () ->
                     reportServiceDomain.getTrackingAction(ReportStatus.PENDING));
             assertTrue(ex.getMessage().contains("Report status not found"));
+        }
+    }
+
+    @Nested
+    @DisplayName("validateMember")
+    class ValidateMember {
+
+        @Test
+        void validateMemberCaseMember(){
+            // Arrange
+            Member member = new Member();
+            member.setId(3L);
+            member.setName("Sara");
+            member.setRole(RoleType.MEMBER);
+
+            report.setMember(member);
+            when(reportRepo.findByMemberId(3L)).thenReturn(List.of(report));
+
+            // Act
+            List<Report> resultList= reportServiceDomain.validateMember(member);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(1, resultList.size()),
+                    () -> assertEquals(RoleType.MEMBER, resultList.get(0).getMember().getRole())
+            );
+
+            //
+            verify(reportRepo).findByMemberId(3L);
+            verifyNoMoreInteractions(reportRepo);
+        }
+
+        @Test
+        void validateAdmin(){
+            // Arrange
+            Member member = new Member();
+            member.setId(1L);
+            member.setName("Ferm");
+            member.setRole(RoleType.ADMIN);
+
+            report.setMember(member);
+            when(reportRepo.findAll()).thenReturn(List.of(report));
+            // Act
+            List<Report> resultList = reportServiceDomain.validateMember(member);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(1, resultList.size()),
+                    () -> assertTrue(resultList.get(0).getMember().getRole() == RoleType.ADMIN || resultList.get(0).getMember().getRole() == RoleType.SUPERVISOR)
+
+            );
+            verify(reportRepo).findAll();
+            verifyNoMoreInteractions(reportRepo);
+        }
+
+
+
+        @Test
+        void validateMember_notFound(){
+            // Arrange
+            Member member = new Member();
+            member.setId(4L);
+            member.setName("Sara");
+            member.setRole(null);
+
+            // Act
+            RuntimeException ex = assertThrows(RuntimeException.class, () -> reportServiceDomain.validateMember(member));
+
+            // Assert
+            assertTrue(ex.getMessage().contains("Role invalid : "));
+
         }
     }
 

@@ -377,4 +377,56 @@ public class ReportServiceTest {
 
         // InOrder & Verify
     }
+
+    @Test
+    void getAllReportSummariesByMember(){
+        // Arrange
+        Member member = new Member();
+        member.setId(1L);
+
+        when(reportServiceDomain.validateMember(member)).thenReturn(List.of(report));
+
+         ReportSummaryDTOResponse expectedResponse = new ReportSummaryDTOResponse(
+                2L,
+                "Robo en almacén",
+                "Acceso no autorizado detectado",
+                LocalDateTime.of(2026, Month.MARCH, 20, 10, 0),
+                fixedNow,
+                "PERU",
+                RegionType.LIMA,
+                "LIMA",
+                "Lima",
+                "MIRAFLORES",
+                "Miraflores",
+                "Av. Principal 123",
+                "Cerca de la puerta trasera",
+                new BigDecimal("-12.0464"),
+                new BigDecimal("-77.0428"),
+                PriorityLevel.HIGH,
+                ReportStatus.PENDING,
+                2L,
+                "Seguridad",
+                2L,
+                "Ferr",
+                 0,
+                 List.of()
+        );
+
+        when(reportMapper.toReportSummaryDTOResponse(report)).thenReturn(expectedResponse);
+        // Act
+        List<ReportSummaryDTOResponse> responses = reportService.getReportSummariesByMember(member);
+
+        // Assert
+        assertAll(
+                () -> assertEquals(1, responses.size()),
+                () -> assertEquals(expectedResponse, responses.get(0))
+        );
+
+        // InOrder & Verify
+        InOrder inOrder = inOrder(reportServiceDomain, reportMapper);
+        inOrder.verify(reportServiceDomain, times(1)).validateMember(member);
+        inOrder.verify(reportMapper, times(1)).toReportSummaryDTOResponse(report);
+        inOrder.verifyNoMoreInteractions();
+
+    }
 }
