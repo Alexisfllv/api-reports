@@ -44,8 +44,8 @@ public class CategoryServiceTest {
     @BeforeEach
     public void setUp() {
         categoryDTORequest = new CategoryDTORequest("Vandalismo", "Propiedad privada");
-        category = new Category(1L, "Vandalismo", "Propiedad privada",true);
-        categoryDTOResponse = new CategoryDTOResponse(1L, "Vandalismo", "Propiedad privada",true);
+        category = new Category(1L, "Vandalismo", "Propiedad privada", true);
+        categoryDTOResponse = new CategoryDTOResponse(1L, "Vandalismo", "Propiedad privada", true);
     }
 
     @Test
@@ -78,8 +78,8 @@ public class CategoryServiceTest {
             // Arrange
             List<Category> categoryList = List.of(category);
             List<CategoryDTOResponse> categoryDTOResponseList = List.of(categoryDTOResponse);
-             when(categoryRepo.findAll()).thenReturn(categoryList);
-             when(categoryMapper.toCategoryDTOResponse(category)).thenReturn(categoryDTOResponse);
+            when(categoryRepo.findAll()).thenReturn(categoryList);
+            when(categoryMapper.toCategoryDTOResponse(category)).thenReturn(categoryDTOResponse);
             // Act
             List<CategoryDTOResponse> result = categoryService.getAllCategories();
             // Assert

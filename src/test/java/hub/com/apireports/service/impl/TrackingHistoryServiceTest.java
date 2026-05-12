@@ -32,22 +32,22 @@ public class TrackingHistoryServiceTest {
     private TrackingHistoryRepo trackingHistoryRepo;
 
     @Mock
-    private ReportServiceDomain  reportServiceDomain;
+    private ReportServiceDomain reportServiceDomain;
 
     @Mock
-    private TrackingHistoryMapper  trackingHistoryMapper;
+    private TrackingHistoryMapper trackingHistoryMapper;
 
     @InjectMocks
     private TrackingHistoryServiceImpl trackingHistoryService;
 
     TrackingHistory trackingHistory;
-    TrackingHistoryDTOResponse  trackingHistoryDTOResponse;
+    TrackingHistoryDTOResponse trackingHistoryDTOResponse;
 
     Member member;
     Report report;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         member = new Member();
         member.setId(2L);
         member.setName("alexis");
@@ -75,7 +75,7 @@ public class TrackingHistoryServiceTest {
     }
 
     @Test
-    void getTrackingHistoryByReportId(){
+    void getTrackingHistoryByReportId() {
         // Arrange
         Long reportId = 1L;
         when(reportServiceDomain.findById(reportId)).thenReturn(report);
@@ -97,7 +97,7 @@ public class TrackingHistoryServiceTest {
         );
 
         //
-        InOrder inOrder = Mockito.inOrder(reportServiceDomain,trackingHistoryRepo, trackingHistoryMapper);
+        InOrder inOrder = Mockito.inOrder(reportServiceDomain, trackingHistoryRepo, trackingHistoryMapper);
         inOrder.verify(reportServiceDomain).findById(reportId);
         inOrder.verify(trackingHistoryRepo).findByReportId(reportId);
         inOrder.verify(trackingHistoryMapper).toTrackingDTOResponse(trackingHistory, report);
@@ -105,7 +105,7 @@ public class TrackingHistoryServiceTest {
     }
 
     @Test
-    void getAllTrackingHistoryGroupedByReport(){
+    void getAllTrackingHistoryGroupedByReport() {
         // Arrange
         Member member2 = new Member();
         member2.setId(3L);

@@ -40,8 +40,8 @@ public class MemberServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = new Member(1L,"Sara","Lopez","70576713","920287650","sarama@gmail.com","SL70576713",null, RoleType.MEMBER, UserStatus.ACTIVE);
-        memberDTOResponse = new MemberDTOResponse(1L,"Sara","Lopez","70576713","920287650","sarama@gmail.com","SL70576713", RoleType.MEMBER, UserStatus.ACTIVE);
+        member = new Member(1L, "Sara", "Lopez", "70576713", "920287650", "sarama@gmail.com", "SL70576713", null, RoleType.MEMBER, UserStatus.ACTIVE);
+        memberDTOResponse = new MemberDTOResponse(1L, "Sara", "Lopez", "70576713", "920287650", "sarama@gmail.com", "SL70576713", RoleType.MEMBER, UserStatus.ACTIVE);
     }
 
     @Nested
@@ -49,8 +49,8 @@ public class MemberServiceTest {
         @Test
         public void findAllMember() {
             // Arrange
-            List<Member> listEntity= List.of(member);
-            List<MemberDTOResponse> listDTOResponse= List.of(memberDTOResponse);
+            List<Member> listEntity = List.of(member);
+            List<MemberDTOResponse> listDTOResponse = List.of(memberDTOResponse);
             when(memberRepo.findAll()).thenReturn(listEntity);
             when(memberMapper.toMemberDTOResponse(member)).thenReturn(memberDTOResponse);
 
@@ -60,12 +60,12 @@ public class MemberServiceTest {
             // Assert
             assertAll(
                     () -> assertNotNull(result),
-                    () -> assertEquals(1,result.size()),
-                    () -> assertEquals(listDTOResponse,result)
+                    () -> assertEquals(1, result.size()),
+                    () -> assertEquals(listDTOResponse, result)
             );
 
             // Verifiy InOrder
-            InOrder inOrder= Mockito.inOrder(memberRepo,memberMapper);
+            InOrder inOrder = Mockito.inOrder(memberRepo, memberMapper);
             inOrder.verify(memberRepo).findAll();
             inOrder.verify(memberMapper).toMemberDTOResponse(member);
             inOrder.verifyNoMoreInteractions();
@@ -74,8 +74,8 @@ public class MemberServiceTest {
         @Test
         public void findAllMemberEmpty() {
             // Arange
-            List<Member> emptyList= List.of();
-            List<MemberDTOResponse> emptyListDto= List.of();
+            List<Member> emptyList = List.of();
+            List<MemberDTOResponse> emptyListDto = List.of();
             when(memberRepo.findAll()).thenReturn(emptyList);
 
             // Act
@@ -85,11 +85,11 @@ public class MemberServiceTest {
             assertAll(
                     () -> assertNotNull(result),
                     () -> assertTrue(result.isEmpty()),
-                    () -> assertEquals(emptyListDto,result)
+                    () -> assertEquals(emptyListDto, result)
             );
 
             // Verify InOrder
-            InOrder inOrder= Mockito.inOrder(memberRepo,memberMapper);
+            InOrder inOrder = Mockito.inOrder(memberRepo, memberMapper);
             inOrder.verify(memberRepo).findAll();
             inOrder.verifyNoMoreInteractions();
         }

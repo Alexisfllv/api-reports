@@ -71,7 +71,7 @@ public class ReportFileServiceTest {
     private Report report;
 
     @BeforeEach
-    void setUp() throws Exception{
+    void setUp() throws Exception {
         // uploadDir temp
         Field uploadDirField = ReportFileServiceImpl.class.getDeclaredField("uploadDir");
         uploadDirField.setAccessible(true);
@@ -80,7 +80,7 @@ public class ReportFileServiceTest {
         // maxsizeBytes
         Field maxSizeField = ReportFileServiceImpl.class.getDeclaredField("maxSizeBytes");
         maxSizeField.setAccessible(true);
-        maxSizeField.set(reportFileService,209715200L); // 200MB
+        maxSizeField.set(reportFileService, 209715200L); // 200MB
 
         member = new Member();
         member.setId(1L);
@@ -98,16 +98,16 @@ public class ReportFileServiceTest {
 
         @Test
         @DisplayName("should upload multiple valid files and return responses")
-        void shouldUploadMultipleValidFilesAndReturnResponses(){
+        void shouldUploadMultipleValidFilesAndReturnResponses() {
             // Arrange
             MockMultipartFile foto1 = new MockMultipartFile(
-                    "files","foto1.jpg","image/jpeg","foto1content".getBytes()
+                    "files", "foto1.jpg", "image/jpeg", "foto1content".getBytes()
             );
             MockMultipartFile foto2 = new MockMultipartFile(
-                    "files","foto2.jpg","image/jpeg","foto2content".getBytes()
+                    "files", "foto2.jpg", "image/jpeg", "foto2content".getBytes()
             );
 
-            List<MultipartFile> files = List.of(foto1,foto2);
+            List<MultipartFile> files = List.of(foto1, foto2);
 
             ReportFile savedFile1 = new ReportFile();
             savedFile1.setId(null);
@@ -124,12 +124,12 @@ public class ReportFileServiceTest {
             savedFile2.setReport(report);
 
             ReportFileDTOResponse response1 = new ReportFileDTOResponse(
-                    1L,"foto1.jpg","uploads/reports/1/uuid1.jpge",
-                    FileType.IMAGE,10L,report.getId());
+                    1L, "foto1.jpg", "uploads/reports/1/uuid1.jpge",
+                    FileType.IMAGE, 10L, report.getId());
 
             ReportFileDTOResponse response2 = new ReportFileDTOResponse(
-                    2L,"foto2.jpg","uploads/reports/1/uuid2.jpge",
-                    FileType.IMAGE,10L,report.getId());
+                    2L, "foto2.jpg", "uploads/reports/1/uuid2.jpge",
+                    FileType.IMAGE, 10L, report.getId());
 
             when(reportServiceDomain.findById(1L)).thenReturn(report);
             when(memberServiceDomain.findById(1L)).thenReturn(member);
@@ -139,7 +139,7 @@ public class ReportFileServiceTest {
             when(fileMapper.toFileDTOResponse(savedFile1)).thenReturn(response1);
             when(fileMapper.toFileDTOResponse(savedFile2)).thenReturn(response2);
             // Act
-            List<ReportFileDTOResponse> result = reportFileService.uploadFiles(1L,1L, files);
+            List<ReportFileDTOResponse> result = reportFileService.uploadFiles(1L, 1L, files);
 
             // Assert
             assertAll(
@@ -169,7 +169,7 @@ public class ReportFileServiceTest {
 
         @Test
         @DisplayName("should throw when list is empty")
-        void uploadFiles_withEmptyList_throwsBusinessRuleException(){
+        void uploadFiles_withEmptyList_throwsBusinessRuleException() {
             // Arrange
             when(reportServiceDomain.findById(1L)).thenReturn(report);
             when(memberServiceDomain.findById(1L)).thenReturn(member);
@@ -177,7 +177,7 @@ public class ReportFileServiceTest {
 
             // Act Assert
             assertThrows(RuntimeException.class,
-                    () -> reportFileService.uploadFiles(1L,1L, List.of()));
+                    () -> reportFileService.uploadFiles(1L, 1L, List.of()));
 
             // Verify
             verify(fileRepo, never()).save(any());
@@ -186,14 +186,14 @@ public class ReportFileServiceTest {
 
         @Test
         @DisplayName("should throw when files exceed max limit")
-        void uploadFiles_withNullList_throwBusinessRuleException(){
+        void uploadFiles_withNullList_throwBusinessRuleException() {
 
             // Arrange
             when(reportServiceDomain.findById(1L)).thenReturn(report);
             when(memberServiceDomain.findById(1L)).thenReturn(member);
             // Act
             RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> reportFileService.uploadFiles(1L,1L, null));
+                    () -> reportFileService.uploadFiles(1L, 1L, null));
             // Assert
             assertEquals("At least one file is required", exception.getMessage());
 
@@ -205,17 +205,17 @@ public class ReportFileServiceTest {
 
         @Test
         @DisplayName("should throw when files exceed max limit")
-        void uploadFiles_exceedingMaxFiles_throwsBusinessRuleException(){
+        void uploadFiles_exceedingMaxFiles_throwsBusinessRuleException() {
             // Arrange
 
             // MAX = 10
             List<MultipartFile> files = Collections.nCopies(11,
-                    new MockMultipartFile("files","foto.jpg","image/jpeg","content".getBytes()));
+                    new MockMultipartFile("files", "foto.jpg", "image/jpeg", "content".getBytes()));
             when(reportServiceDomain.findById(1L)).thenReturn(report);
             when(memberServiceDomain.findById(1L)).thenReturn(member);
             // Act
             RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> reportFileService.uploadFiles(1L,1L, files));
+                    () -> reportFileService.uploadFiles(1L, 1L, files));
 
             // Assert
             assertTrue(exception.getMessage().contains("Cannot upload more than "));
@@ -232,7 +232,7 @@ public class ReportFileServiceTest {
 
         @Test
         @DisplayName("should throw when file is empty")
-        void uploadFiles_withEmptyList_throwsBusinessRuleException(){
+        void uploadFiles_withEmptyList_throwsBusinessRuleException() {
             // Arrange
             MockMultipartFile emptyFile = new MockMultipartFile(
                     "files", "foto.jpg", "image/jpeg", new byte[0]  // contenido vacío
@@ -243,7 +243,7 @@ public class ReportFileServiceTest {
 
             // Act
             RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> reportFileService.uploadFiles(1L,1L, List.of(emptyFile)));
+                    () -> reportFileService.uploadFiles(1L, 1L, List.of(emptyFile)));
 
             // Assert
             assertTrue(exception.getMessage().contains("File cannot be empty"));
@@ -256,18 +256,18 @@ public class ReportFileServiceTest {
 
         @Test
         @DisplayName("should throw when file type is not allowed")
-        void uploadFiles_withInvalidFileType_throwBusinessRuleException(){
+        void uploadFiles_withInvalidFileType_throwBusinessRuleException() {
             // Arrange
 
             MockMultipartFile invalidFile = new MockMultipartFile(
-                    "files","documento.exe","application/exe", "content".getBytes()
+                    "files", "documento.exe", "application/exe", "content".getBytes()
             );
 
             when(reportServiceDomain.findById(1L)).thenReturn(report);
             when(memberServiceDomain.findById(1L)).thenReturn(member);
             // Act
             RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> reportFileService.uploadFiles(1L,1L, List.of(invalidFile)));
+                    () -> reportFileService.uploadFiles(1L, 1L, List.of(invalidFile)));
             // Assert
             assertTrue(exception.getMessage().contains("File type not allowed: "));
 
@@ -275,14 +275,15 @@ public class ReportFileServiceTest {
             verify(fileRepo, never()).save(any());
             verify(trackingHistoryRepo, never()).save(any());
         }
+
         @Test
         @DisplayName("should throw when file size exceeds limit")
-        void uploadFiles_withFileSizeExceeded_throwsBusinessRuleException(){
+        void uploadFiles_withFileSizeExceeded_throwsBusinessRuleException() {
             // Arrange
             // MAX  = 5MB
             byte[] bigContent = new byte[201 * 1024 * 1024];
             MockMultipartFile bigFile = new MockMultipartFile(
-                    "files","grande.jpge","image/jpeg",bigContent
+                    "files", "grande.jpge", "image/jpeg", bigContent
             );
 
             when(reportServiceDomain.findById(1L)).thenReturn(report);
@@ -290,7 +291,7 @@ public class ReportFileServiceTest {
 
             // Act
             RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> reportFileService.uploadFiles(1L,1L, List.of(bigFile)));
+                    () -> reportFileService.uploadFiles(1L, 1L, List.of(bigFile)));
 
             // Assert
             assertTrue(exception.getMessage().contains("exceeds maximum size of "));
@@ -302,10 +303,10 @@ public class ReportFileServiceTest {
 
         @Test
         @DisplayName("should throw when any file in list is invalid — none should be saved")
-        void uploadFiles_withOneInvalidInList_noFileSaved(){
+        void uploadFiles_withOneInvalidInList_noFileSaved() {
             // Arrange
             MockMultipartFile validFile = new MockMultipartFile(
-                    "files","foto.jpg","image/jpeg","content".getBytes()
+                    "files", "foto.jpg", "image/jpeg", "content".getBytes()
             );
 
             MockMultipartFile invalidFile = new MockMultipartFile(
@@ -316,7 +317,7 @@ public class ReportFileServiceTest {
             when(memberServiceDomain.findById(1L)).thenReturn(member);
             // Act
             RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> reportFileService.uploadFiles(1L,1L, List.of(validFile,invalidFile)));
+                    () -> reportFileService.uploadFiles(1L, 1L, List.of(validFile, invalidFile)));
 
             // Assert
             assertTrue(exception.getMessage().contains("File type not allowed"));

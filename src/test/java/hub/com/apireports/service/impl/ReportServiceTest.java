@@ -1,10 +1,7 @@
 package hub.com.apireports.service.impl;
 
 import hub.com.apireports.dto.file.ReportFileSummaryDTOResponse;
-import hub.com.apireports.dto.report.ReportDTORequest;
-import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
-import hub.com.apireports.dto.report.ReportDTOResponse;
-import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
+import hub.com.apireports.dto.report.*;
 import hub.com.apireports.entity.Category;
 import hub.com.apireports.entity.Report;
 import hub.com.apireports.entity.ReportFile;
@@ -22,6 +19,8 @@ import hub.com.apireports.service.domain.CategoryServiceDomain;
 import hub.com.apireports.service.domain.MemberServiceDomain;
 import hub.com.apireports.service.domain.ReportServiceDomain;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -69,13 +68,15 @@ public class ReportServiceTest {
     private ReportServiceImpl reportService;
 
 
-
     private LocalDateTime fixedNow;
     private Member member;
     private Category category;
     private ReportDTORequest request;
     private ReportDTOResponse response;
     private Report report;
+
+    private LocalDateTime startOfDay;
+    private LocalDateTime endOfDay;
 
     @BeforeEach
     void setUp() {
@@ -214,7 +215,7 @@ public class ReportServiceTest {
     }
 
     @Test
-    void getAllReports_(){
+    void getAllReports_() {
 
         // Arrange
         List<ReportDTOResponse> expectedResponse = List.of(response);
@@ -232,7 +233,7 @@ public class ReportServiceTest {
                 () -> assertEquals(response.reportDate(), result.get(0).reportDate()),
                 () -> assertEquals(response.categoryName(), result.get(0).categoryName()),
                 () -> assertEquals(response.memberName(), result.get(0).memberName()),
-                () -> assertEquals(response,result.get(0))
+                () -> assertEquals(response, result.get(0))
         );
 
         // InOrder & Verify
@@ -243,7 +244,7 @@ public class ReportServiceTest {
     }
 
     @Test
-    void getAllReportSummaries(){
+    void getAllReportSummaries() {
         // Arrange
 
         ReportFileSummaryDTOResponse file1 = new ReportFileSummaryDTOResponse(
@@ -262,9 +263,9 @@ public class ReportServiceTest {
                 65345L
         );
 
-        List<ReportFileSummaryDTOResponse> files = List.of(file1,file2);
+        List<ReportFileSummaryDTOResponse> files = List.of(file1, file2);
 
-        ReportSummaryDTOResponse  expectedResponse = new ReportSummaryDTOResponse(
+        ReportSummaryDTOResponse expectedResponse = new ReportSummaryDTOResponse(
                 1L,
                 "Poste de luz caído",
                 "Se reporta un poste de luz caído en medio de la vía pública generando peligro para peatones y vehículos.",
@@ -320,9 +321,9 @@ public class ReportServiceTest {
     }
 
     @Test
-    void toggleReportStatus(){
+    void toggleReportStatus() {
         // Arrange
-        Long reportId= 2L;
+        Long reportId = 2L;
         Long memberId = 2L;
 
         Report reportUpdate = report;
@@ -334,7 +335,7 @@ public class ReportServiceTest {
         when(reportRepo.save(report)).thenReturn(reportUpdate);
         when(trackingHistoryRepo.save(any(TrackingHistory.class))).thenReturn(new TrackingHistory());
 
-         ReportSummaryDTOResponse expectedResponse = new ReportSummaryDTOResponse(
+        ReportSummaryDTOResponse expectedResponse = new ReportSummaryDTOResponse(
                 2L,
                 "Robo en almacén",
                 "Acceso no autorizado detectado",
@@ -356,18 +357,18 @@ public class ReportServiceTest {
                 "Seguridad",
                 2L,
                 "Ferr",
-                 0,
-                 List.of()
+                0,
+                List.of()
         );
 
         when(reportMapper.toReportSummaryDTOResponse(reportUpdate)).thenReturn(expectedResponse);
 
-         ReportDTORequestToggleStatus toggleStatus = new ReportDTORequestToggleStatus(
-                 ReportStatus.IN_REVIEW,
-                 "Revisión inicial"
-         );
+        ReportDTORequestToggleStatus toggleStatus = new ReportDTORequestToggleStatus(
+                ReportStatus.IN_REVIEW,
+                "Revisión inicial"
+        );
         // Act
-        ReportSummaryDTOResponse res = reportService.toggleReportStatus(reportId,memberId,toggleStatus);
+        ReportSummaryDTOResponse res = reportService.toggleReportStatus(reportId, memberId, toggleStatus);
 
         // Assert
         assertAll(
@@ -379,14 +380,14 @@ public class ReportServiceTest {
     }
 
     @Test
-    void getAllReportSummariesByMember(){
+    void getAllReportSummariesByMember() {
         // Arrange
         Member member = new Member();
         member.setId(1L);
 
         when(reportServiceDomain.validateMember(member)).thenReturn(List.of(report));
 
-         ReportSummaryDTOResponse expectedResponse = new ReportSummaryDTOResponse(
+        ReportSummaryDTOResponse expectedResponse = new ReportSummaryDTOResponse(
                 2L,
                 "Robo en almacén",
                 "Acceso no autorizado detectado",
@@ -408,8 +409,8 @@ public class ReportServiceTest {
                 "Seguridad",
                 2L,
                 "Ferr",
-                 0,
-                 List.of()
+                0,
+                List.of()
         );
 
         when(reportMapper.toReportSummaryDTOResponse(report)).thenReturn(expectedResponse);
@@ -429,4 +430,70 @@ public class ReportServiceTest {
         inOrder.verifyNoMoreInteractions();
 
     }
+
+    @Test
+    void dashboardSummaryDTOResponse() {
+        // Arrange
+        when(reportRepo.countByStatus(ReportStatus.PENDING)).thenReturn(10L);
+        when(reportRepo.countByStatus(ReportStatus.IN_REVIEW)).thenReturn(5L);
+        when(reportRepo.countByStatus(ReportStatus.RESOLVED)).thenReturn(6L);
+        when(reportRepo.countByStatus(ReportStatus.REJECTED)).thenReturn(2L);
+        when(reportRepo.countByStatus(ReportStatus.CLOSED)).thenReturn(2L);
+
+        when(reportRepo.countByPriorityLevel(PriorityLevel.CRITICAL)).thenReturn(4L);
+        when(reportRepo.countByPriorityLevel(PriorityLevel.HIGH)).thenReturn(8L);
+        when(reportRepo.countByPriorityLevel(PriorityLevel.MEDIUM)).thenReturn(9L);
+        when(reportRepo.countByPriorityLevel(PriorityLevel.LOW)).thenReturn(4L);
+
+        startOfDay = LocalDateTime.of(2026, Month.MARCH, 24, 0, 0);
+        endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
+        when(reportRepo.countByPriorityLevelAndReportDateBetween(
+                PriorityLevel.CRITICAL, startOfDay, endOfDay)).thenReturn(2L);
+
+        when(reportRepo.countByStatusAndReportDateBetween(
+                ReportStatus.PENDING, startOfDay, endOfDay)).thenReturn(3L);
+
+        when(reportRepo.countByReportDateBetween(
+                startOfDay, endOfDay)).thenReturn(5L);
+        // Act
+        DashboardSummaryDTOResponse result = reportService.getDashboardByReport();
+
+        // Assert
+        assertAll(
+                () -> assertNotNull(result),
+                () -> assertEquals(25L, result.totalReports()),
+                () -> assertEquals(10L, result.pending()),
+                () -> assertEquals(5L, result.inReview()),
+                () -> assertEquals(6L, result.resolved()),
+                () -> assertEquals(2L, result.rejected()),
+                () -> assertEquals(2L, result.closed()),
+                () -> assertEquals(4L, result.totalCritical()),
+                () -> assertEquals(8L, result.totalHigh()),
+                () -> assertEquals(9L, result.totalMedium()),
+                () -> assertEquals(4L, result.totalLow()),
+                () -> assertEquals(2L, result.criticalToday()),
+                () -> assertEquals(3L, result.pendingToday()),
+                () -> assertEquals(5L, result.createdToday())
+        );
+
+        // Verify
+        verify(reportRepo, times(1)).countByStatus(ReportStatus.PENDING);
+        verify(reportRepo, times(1)).countByStatus(ReportStatus.IN_REVIEW);
+        verify(reportRepo, times(1)).countByStatus(ReportStatus.RESOLVED);
+        verify(reportRepo, times(1)).countByStatus(ReportStatus.REJECTED);
+        verify(reportRepo, times(1)).countByStatus(ReportStatus.CLOSED);
+        verify(reportRepo, times(1)).countByPriorityLevel(PriorityLevel.CRITICAL);
+        verify(reportRepo, times(1)).countByPriorityLevel(PriorityLevel.HIGH);
+        verify(reportRepo, times(1)).countByPriorityLevel(PriorityLevel.MEDIUM);
+        verify(reportRepo, times(1)).countByPriorityLevel(PriorityLevel.LOW);
+        verify(reportRepo, times(1)).countByPriorityLevelAndReportDateBetween(
+                PriorityLevel.CRITICAL, startOfDay, endOfDay);
+        verify(reportRepo, times(1)).countByStatusAndReportDateBetween(
+                ReportStatus.PENDING, startOfDay, endOfDay);
+        verify(reportRepo, times(1)).countByReportDateBetween(startOfDay, endOfDay);
+        verifyNoMoreInteractions(reportRepo);
+
+    }
+
 }
