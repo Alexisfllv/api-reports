@@ -1,9 +1,6 @@
 package hub.com.apireports.service;
 
-import hub.com.apireports.dto.report.ReportDTORequest;
-import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
-import hub.com.apireports.dto.report.ReportDTOResponse;
-import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
+import hub.com.apireports.dto.report.*;
 import hub.com.apireports.entity.security.Member;
 
 import java.util.List;
@@ -16,6 +13,9 @@ public interface ReportService {
 
     // GET
     List<ReportDTOResponse> getAllReports();
+
+    // dashboard
+    DashboardSummaryDTOResponse getDashboardByReport();
 
     // Summary
     List<ReportSummaryDTOResponse> getAllReportSummaries();
