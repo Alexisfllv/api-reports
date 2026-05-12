@@ -1,10 +1,7 @@
 package hub.com.apireports.controller;
 
 
-import hub.com.apireports.dto.report.ReportDTORequest;
-import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
-import hub.com.apireports.dto.report.ReportDTOResponse;
-import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
+import hub.com.apireports.dto.report.*;
 import hub.com.apireports.entity.security.Member;
 import hub.com.apireports.service.ReportService;
 import hub.com.apireports.service.security.MemberDetailServiceImpl;
@@ -50,6 +47,13 @@ public class ReportController {
             @AuthenticationPrincipal Member member){
         List<ReportSummaryDTOResponse> reports = reportService.getReportSummariesByMember(member);
         return ResponseEntity.status(HttpStatus.OK).body(reports);
+    }
+
+    @GetMapping("/admin/dashboard-report")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<DashboardSummaryDTOResponse>getDashboardByReport(){
+        DashboardSummaryDTOResponse response = reportService.getDashboardByReport();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PatchMapping("/{reportId}/status")

@@ -1,12 +1,10 @@
 package hub.com.apireports.service.impl;
 
-import hub.com.apireports.dto.report.ReportDTORequest;
-import hub.com.apireports.dto.report.ReportDTORequestToggleStatus;
-import hub.com.apireports.dto.report.ReportDTOResponse;
-import hub.com.apireports.dto.report.ReportSummaryDTOResponse;
+import hub.com.apireports.dto.report.*;
 import hub.com.apireports.entity.Category;
 import hub.com.apireports.entity.Report;
 import hub.com.apireports.entity.TrackingHistory;
+import hub.com.apireports.entity.enums.PriorityLevel;
 import hub.com.apireports.entity.enums.ReportStatus;
 import hub.com.apireports.entity.enums.TrackingAction;
 import hub.com.apireports.entity.security.Member;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -78,6 +77,41 @@ public class ReportServiceImpl implements ReportService {
         return reports.stream()
                 .map(reportMapper::toReportDTOResponse)
                 .toList();
+    }
+
+    @Override
+    public DashboardSummaryDTOResponse getDashboardByReport() {
+        LocalDateTime startOfDay = LocalDate.now(clock).atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+        // total por status
+        Long pending = reportRepo.countByStatus(ReportStatus.PENDING);
+        Long inReview = reportRepo.countByStatus(ReportStatus.IN_REVIEW);
+        Long resolved = reportRepo.countByStatus(ReportStatus.RESOLVED);
+        Long rejected = reportRepo.countByStatus(ReportStatus.REJECTED);
+        Long closed = reportRepo.countByStatus(ReportStatus.CLOSED);
+        Long total = pending + inReview + resolved + rejected + closed;
+
+        // total priority
+        Long critical = reportRepo.countByPriorityLevel(PriorityLevel.CRITICAL);
+        Long High = reportRepo.countByPriorityLevel(PriorityLevel.HIGH);
+        Long medium = reportRepo.countByPriorityLevel(PriorityLevel.MEDIUM);
+        Long Low = reportRepo.countByPriorityLevel(PriorityLevel.LOW);
+
+        // today
+        Long criticalToday = reportRepo.countByPriorityLevelAndReportDateBetween(
+                PriorityLevel.CRITICAL, startOfDay, endOfDay
+        );
+        Long pendingToday = reportRepo.countByStatusAndReportDateBetween(
+                ReportStatus.PENDING, startOfDay, endOfDay
+        );
+        Long createdToday = reportRepo.countByReportDateBetween(
+                startOfDay, endOfDay
+        );
+        return new DashboardSummaryDTOResponse(
+                total, pending, inReview, resolved, rejected, closed,
+                critical, High, medium, Low,
+                criticalToday, pendingToday, createdToday
+        );
     }
 
     @Override
